@@ -18,6 +18,9 @@ function matches (rule, input, start) {
   if('function' === typeof rule)
     return rule(input, start)
 
+  if('fn' in rule )
+    return rule.fn(input, start)
+
   var m = rule.exec(input.substring(start))
   if(m)
     return {length: m[0].length, groups: null}

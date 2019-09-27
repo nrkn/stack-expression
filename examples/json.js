@@ -22,15 +22,6 @@ var string = AND('"', GROUP(MANY(OR(escape, unescaped)), join), OR('"', FAIL('ex
 //it makes it much much faster than matching each individual character
 //then passing it to join.
 
-//objects and arrays.
-var value = RECURSE()
-
-var array = AND('[', _, GROUP(MAYBE(JOIN(AND(_, value, _), ','))),  _, OR(']', FAIL('expected ]')))
-
-//parse each key value pair into a two element array, [key, value]
-//then this is passed to toObject in the map for object.
-var keyValue = GROUP(AND( _, string, _, OR(":", FAIL("expected :")), _, value, _ ))
-
 function toObject (ary) {
   var o = {}
   for(var i = 0; i < ary.length; i++)
@@ -38,12 +29,22 @@ function toObject (ary) {
   return o
 }
 
-var object = AND('{', _, GROUP(MAYBE(JOIN(keyValue, ',' )), toObject), _, OR('}', FAIL('expected }')))
+var value = {}, array = {}, keyValue = {}, object = {}
+
+//objects and arrays.
+value.fn = OR(object, array, string, number, nul, boolean, FAIL('expected json value'))
+
+array.fn = AND('[', _, GROUP(MAYBE(JOIN(AND(_, value, _), ','))),  _, OR(']', FAIL('expected ]')))
+
+//parse each key value pair into a two element array, [key, value]
+//then this is passed to toObject in the map for object.
+keyValue.fn = GROUP(AND( _, string, _, OR(":", FAIL("expected :")), _, value, _ ))
+
+object.fn = AND('{', _, GROUP(MAYBE(JOIN(keyValue, ',' )), toObject), _, OR('}', FAIL('expected }')))
 
 //accept any valid json type at the top level.
-value(OR(object, array, string, number, nul, boolean, FAIL('expected json value')))
 
-module.exports = value
+module.exports = value.fn
 
 //these might be useful in other parsers
 module.exports.string = string
