@@ -3,8 +3,19 @@ var json = require('../examples/json')
 var getError = require('../').getError
 // --------------------
 
+var pass = [
+  {okay: [0,-1,-1.1,1e5], emptyObj: {}}//, emptyArr: [], str: 'a"bc'}
+]
+
+for(var i = 0; i < pass.length; i++) {
+  var str = JSON.stringify(pass[i])
+  console.log(
+    json(str, 0).groups[0]  
+  )
+}
+
 console.log(
-  json(JSON.stringify({okay: [1,2,3], empty: {}}), 0).groups[0]
+  'bad e', json('1e1.1',0).groups[0]
 )
 
 var fs = require('fs')
